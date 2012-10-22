@@ -71,31 +71,31 @@
 
 <p>So, what we&#8217;re doing more specifically is creating a <code>moment</code> object in <code>utc()</code> mode. We are passing in the datetime string to parse into a Date() object and the format string of that datetime. We then translate the object to user-local time with <code>local()</code> and then format into format we like for our time picker&nbsp;plugin.</p>
 <p>Going the other way around, we do the reverse essentially. This time, <code>post_at</code> is the value from the time picker&#8217;s input text&nbsp;field:</p>
-<div class="codehilite"><pre><span class="n">moment</span><span class="p">(</span> <span class="n">post_at</span><span class="p">,</span> &quot;<span class="n"><span class="caps">MMM</span></span> <span class="n"><span class="caps">DD</span></span><span class="p">,</span> <span class="n"><span class="caps">YYYY</span></span> <span class="n">h</span><span class="p">:</span><span class="n">mm</span> <span class="n">a</span>&quot; <span class="p">).</span><span class="n">utc</span><span class="p">().</span><span class="n">format</span><span class="p">(</span> &quot;<span class="n"><span class="caps">YYYY</span></span><span class="o">-</span><span class="n"><span class="caps">MM</span></span><span class="o">-</span><span class="n"><span class="caps">DD</span></span> <span class="n"><span class="caps">HH</span></span><span class="p">:</span><span class="n">mm</span><span class="p">:</span><span class="n">ss</span>&quot; <span class="p">);</span>
+<div class="codehilite"><pre><span class="nx">moment</span><span class="p">(</span> <span class="nx">post_at</span><span class="p">,</span> <span class="s2">&quot;<span class="caps">MMM</span> <span class="caps">DD</span>, <span class="caps">YYYY</span> h:mm a&quot;</span> <span class="p">).</span><span class="nx">utc</span><span class="p">().</span><span class="nx">format</span><span class="p">(</span> <span class="s2">&quot;<span class="caps">YYYY</span>-<span class="caps">MM</span>-<span class="caps">DD</span> <span class="caps">HH</span>:mm:ss&quot;</span> <span class="p">);</span>
 </pre></div>
 
 
 <p>We first create a <code>moment</code> object in local mode passing it our value and a format string. Switch modes to <code>utc()</code> and then format for the data&nbsp;layer.</p>
 <p>I originally had about 20 lines of gnarly <code>Date()</code> object manipulations to do the work of this two lines of code. Plus, I think my original code was&nbsp;wrong.</p>
 <p>moment.js does lots of other nice things as well. Such as the&nbsp;simple:</p>
-<div class="codehilite"><pre><span class="n">moment</span><span class="p">.</span><span class="n">utc</span><span class="p">();</span>
+<div class="codehilite"><pre><span class="nx">moment</span><span class="p">.</span><span class="nx">utc</span><span class="p">();</span>
 </pre></div>
 
 
 <p>to the&nbsp;sublime:</p>
-<div class="codehilite"><pre><span class="n">moment</span><span class="p">.</span><span class="n">duration</span><span class="p">(</span>24<span class="p">,</span> &quot;<span class="n">hours</span>&quot;<span class="p">).</span><span class="n">humanize</span><span class="p">();</span>  <span class="o">//</span> <span class="n">a</span> <span class="n">day</span>
+<div class="codehilite"><pre><span class="nx">moment</span><span class="p">.</span><span class="nx">duration</span><span class="p">(</span><span class="mi">24</span><span class="p">,</span> <span class="s2">&quot;hours&quot;</span><span class="p">).</span><span class="nx">humanize</span><span class="p">();</span>  <span class="c1">// a day</span>
 </pre></div>
 
 
 <p>There&#8217;s lots of other great features like relative time&nbsp;output:</p>
-<div class="codehilite"><pre><span class="n">moment</span><span class="p">([</span>2007<span class="p">,</span> 0<span class="p">,</span> 29<span class="p">]).</span><span class="n">fromNow</span><span class="p">();</span>     <span class="o">//</span> 4 <span class="n">years</span> <span class="n">ago</span>
+<div class="codehilite"><pre><span class="nx">moment</span><span class="p">([</span><span class="mi">2007</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">29</span><span class="p">]).</span><span class="nx">fromNow</span><span class="p">();</span>     <span class="c1">// 4 years ago</span>
 </pre></div>
 
 
 <p>And for those of you coming from Python who love <code>datediff</code> objects:</p>
-<div class="codehilite"><pre><span class="n">var</span> <span class="n">a</span> <span class="p">=</span> <span class="n">moment</span><span class="p">([</span>2007<span class="p">,</span> 0<span class="p">,</span> 29<span class="p">]);</span>
-<span class="n">var</span> <span class="n">b</span> <span class="p">=</span> <span class="n">moment</span><span class="p">([</span>2007<span class="p">,</span> 0<span class="p">,</span> 28<span class="p">]);</span>
-<span class="n">a</span><span class="p">.</span><span class="n">diff</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">//</span> 86400000
+<div class="codehilite"><pre><span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="nx">moment</span><span class="p">([</span><span class="mi">2007</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">29</span><span class="p">]);</span>
+<span class="kd">var</span> <span class="nx">b</span> <span class="o">=</span> <span class="nx">moment</span><span class="p">([</span><span class="mi">2007</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">28</span><span class="p">]);</span>
+<span class="nx">a</span><span class="p">.</span><span class="nx">diff</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span> <span class="c1">// 86400000</span>
 </pre></div>
 
 
