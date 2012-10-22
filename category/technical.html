@@ -45,8 +45,86 @@
         
             <aside id="featured" class="body">
                 <article>
-                    <h1 class="entry-title"><a href=".././/2012/10/13/javascript-mvc-ember-backbone/">Failing at Javascript <span class="caps">MVC</span> with Ember.js and&nbsp;Backbone.js</a></h1> 
+                    <h1 class="entry-title"><a href=".././/2012/10/22/javascript-momentjs/">Handling time nicely with&nbsp;moment.js</a></h1> 
                     <footer class="post-info">
+        <abbr class="published" title="2012-10-22T00:00:00">
+                Mon 22 October 2012
+        </abbr>
+
+        
+        <address class="vcard author">
+                By <a class="url fn" href=".././author/alex-ezell.html">Alex Ezell</a>
+        </address>
+        
+<p>In <a href=".././category/technical.html">technical</a>. </p>
+<p>tags: <a href=".././tag/javascript.html">javascript</a><a href=".././tag/momentjs.html">moment.js</a><a href=".././tag/time.html">time</a></p>
+
+
+</footer><!-- /.post-info --><p>As every developer knows, handling timezones and the like is a real <span class="caps">PITA</span>. The best minds of our generation have dashed themselves against the jagged rocks of Daylight Savings Time and that part of Indiana that&#8217;s always 30 minutes behind the rest of&nbsp;Indiana.</p>
+<p>While that detail isn&#8217;t necessarily solved by <a href="http://momentjs.com">moment.js</a>, lots of other gnarly issues are. This library by Tim R. Wood makes working with dates in Javascript a real pleasure. I&#8217;ll take just a moment to show you some of the hurdles we overcame with&nbsp;it.</p>
+<p>In our application, like all good developers are storing all dates in <span class="caps">UTC</span>. Specifically, we are passing date strings in <span class="caps">JSON</span> to a <span class="caps">PHP</span> backend that will treat them as <span class="caps">UTC</span>. Given that, the backend requires a specific format which is a variation of the typical <span class="caps">JSON</span> date time <span class="caps">ISO</span> format you&#8217;ve probably seen. All dates should be in the form: <code>2012-10-22 15:36:32</code>.</p>
+<p>We want to let our users provide us dates in whatever timezone their current browser uses. In our case, we&#8217;re using a jQuery <a href="http://trentrichardson.com/examples/timepicker/">time picker plugin</a> by Trent Richardson. When our users are picking dates, we&#8217;re telling the time picker to format them like this: <code>Oct 22, 2012 3:36 pm</code>.</p>
+<p>Clearly, we&#8217;ll need to translate these times as we move back and forth from the data layer to the presentation layer. To translate the <span class="caps">UTC</span> string to user-local time, we simply do this (where <code>post_at</code> is the string representation of <span class="caps">UTC</span> time from the data&nbsp;layer):</p>
+<div class="codehilite"><pre><span class="n">moment</span><span class="p">.</span><span class="n">utc</span><span class="p">(</span> <span class="n">post_at</span><span class="p">,</span> &quot;<span class="n"><span class="caps">YYYY</span></span><span class="o">-</span><span class="n"><span class="caps">MM</span></span><span class="o">-</span><span class="n"><span class="caps">DD</span></span> <span class="n"><span class="caps">HH</span></span><span class="p">:</span><span class="n">mm</span><span class="p">:</span><span class="n">ss</span>&quot; <span class="p">).</span><span class="n">local</span><span class="p">().</span><span class="n">format</span><span class="p">(</span> &quot;<span class="n"><span class="caps">MMM</span></span> <span class="n"><span class="caps">DD</span></span><span class="p">,</span> <span class="n"><span class="caps">YYYY</span></span> <span class="n">h</span><span class="p">:</span><span class="n">mm</span> <span class="n">a</span>&quot; <span class="p">);</span>
+</pre></div>
+
+
+<p>So, what we&#8217;re doing more specifically is creating a <code>moment</code> object in <code>utc()</code> mode. We are passing in the datetime string to parse into a Date() object and the format string of that datetime. We then translate the object to user-local time with <code>local()</code> and then format into format we like for our time picker&nbsp;plugin.</p>
+<p>Going the other way around, we do the reverse essentially. This time, <code>post_at</code> is the value from the time picker&#8217;s input text&nbsp;field:</p>
+<div class="codehilite"><pre><span class="n">moment</span><span class="p">(</span> <span class="n">post_at</span><span class="p">,</span> &quot;<span class="n"><span class="caps">MMM</span></span> <span class="n"><span class="caps">DD</span></span><span class="p">,</span> <span class="n"><span class="caps">YYYY</span></span> <span class="n">h</span><span class="p">:</span><span class="n">mm</span> <span class="n">a</span>&quot; <span class="p">).</span><span class="n">utc</span><span class="p">().</span><span class="n">format</span><span class="p">(</span> &quot;<span class="n"><span class="caps">YYYY</span></span><span class="o">-</span><span class="n"><span class="caps">MM</span></span><span class="o">-</span><span class="n"><span class="caps">DD</span></span> <span class="n"><span class="caps">HH</span></span><span class="p">:</span><span class="n">mm</span><span class="p">:</span><span class="n">ss</span>&quot; <span class="p">);</span>
+</pre></div>
+
+
+<p>We first create a <code>moment</code> object in local mode passing it our value and a format string. Switch modes to <code>utc()</code> and then format for the data&nbsp;layer.</p>
+<p>I originally had about 20 lines of gnarly <code>Date()</code> object manipulations to do the work of this two lines of code. Plus, I think my original code was&nbsp;wrong.</p>
+<p>moment.js does lots of other nice things as well. Such as the&nbsp;simple:</p>
+<div class="codehilite"><pre><span class="n">moment</span><span class="p">.</span><span class="n">utc</span><span class="p">();</span>
+</pre></div>
+
+
+<p>to the&nbsp;sublime:</p>
+<div class="codehilite"><pre><span class="n">moment</span><span class="p">.</span><span class="n">duration</span><span class="p">(</span>24<span class="p">,</span> &quot;<span class="n">hours</span>&quot;<span class="p">).</span><span class="n">humanize</span><span class="p">();</span>  <span class="o">//</span> <span class="n">a</span> <span class="n">day</span>
+</pre></div>
+
+
+<p>There&#8217;s lots of other great features like relative time&nbsp;output:</p>
+<div class="codehilite"><pre><span class="n">moment</span><span class="p">([</span>2007<span class="p">,</span> 0<span class="p">,</span> 29<span class="p">]).</span><span class="n">fromNow</span><span class="p">();</span>     <span class="o">//</span> 4 <span class="n">years</span> <span class="n">ago</span>
+</pre></div>
+
+
+<p>And for those of you coming from Python who love <code>datediff</code> objects:</p>
+<div class="codehilite"><pre><span class="n">var</span> <span class="n">a</span> <span class="p">=</span> <span class="n">moment</span><span class="p">([</span>2007<span class="p">,</span> 0<span class="p">,</span> 29<span class="p">]);</span>
+<span class="n">var</span> <span class="n">b</span> <span class="p">=</span> <span class="n">moment</span><span class="p">([</span>2007<span class="p">,</span> 0<span class="p">,</span> 28<span class="p">]);</span>
+<span class="n">a</span><span class="p">.</span><span class="n">diff</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="o">//</span> 86400000
+</pre></div>
+
+
+<p>This library has made a difficult problem easy for us to solve. We&#8217;ve been able to do the right thing for our users and for our database&#8217;s sanity. I highly recommend everyone writing javascript applications to give it a&nbsp;look.</p><p>There are <a href=".././/2012/10/22/javascript-momentjs/#disqus_thread">comments</a>.</p>
+                </article>
+                
+            </aside><!-- /#featured -->
+            
+                <section id="content" class="body">
+                    <h1>Other articles</h1>
+                    <hr />
+                    <ol id="posts-list" class="hfeed">
+            
+        
+        
+        
+            
+
+        
+         
+            
+            <li><article class="hentry">    
+                <header>
+                    <h1><a href=".././/2012/10/13/javascript-mvc-ember-backbone/" rel="bookmark"
+                           title="Permalink to Failing at Javascript MVC with Ember.js and Backbone.js">Failing at Javascript <span class="caps">MVC</span> with Ember.js and&nbsp;Backbone.js</a></h1>
+                </header>
+                
+                <div class="entry-content">
+                <footer class="post-info">
         <abbr class="published" title="2012-10-13T00:00:00">
                 Sat 13 October 2012
         </abbr>
@@ -60,87 +138,23 @@
 <p>tags: <a href=".././tag/javascript.html">javascript</a><a href=".././tag/mvc.html">mvc</a><a href=".././tag/emberjs.html">ember.js</a><a href=".././tag/backbonejs.html">backbone.js</a></p>
 
 
-</footer><!-- /.post-info --><p>I recently started work on an app using a third-party <span class="caps">API</span> that deals with posting to and monitoring social networks. Given that the app was going to be a single-page affair and was strictly only going to be using this third-party <span class="caps">API</span>, I thought it would be a good chance to dive into some Javascript <span class="caps">MVC</span>&nbsp;frameworks.</p>
-<p>After a quick survey of my coworkers, all of whom are much more adept at Javascript than I, I decided to try Ember.js and Backbone.js. This blog serves to detail what I was trying to do and how much I failed at progress. While, as of this writing, I have a VanillaJS and jQuery based app that does exactly what I need it to do, I think my failures and roadblocks with Ember.js and Backbone.js might be&nbsp;interesting.</p>
-<h2>The&nbsp;Goal</h2>
-<p>Let me set out my goal, so you&#8217;ll have some context to understand better why I did what I did and maybe even be able to see me going wrong as it&nbsp;happens.</p>
-<p>At work, we have a Django app and I was planning on dropping my Javascript <span class="caps">MVC</span> app into a content area with the rest of the page around it generated by the Javascript&nbsp;application. </p>
-<p>My primary data source would be the third-party <span class="caps">API</span> mentioned above. It&#8217;s a pretty straightforward <span class="caps">REST</span> <span class="caps">API</span> that speaks <span class="caps">JSON</span> and does it in a pretty consistent way. I had already written a Python wrapper around the <span class="caps">API</span>, so I knew what to expect with my data access&nbsp;methods.</p>
-<p>The page as concepted was a one-page app with mostly read views and only one action that would actually need to <span class="caps">POST</span> to the <span class="caps">API</span> and create new&nbsp;data.</p>
-<p>Seemed really simple. I also have a&nbsp;deadline.</p>
-<h2>The First&nbsp;Problem</h2>
-<p>Given that Ember.js requires Handlebars.js and Backbone.js works really well with it, I had to figure out how to get my Handlebars templates into a Django&nbsp;template.</p>
-<p>I ended up finding <a href="https://gist.github.com/3886746">this template tag</a> which let me wrap my Handlebars templates so that Django wouldn&#8217;t try to evaluate anything inside of the&nbsp;tag.</p>
-<p>Problem&nbsp;solved.</p>
-<h2>My Experience with&nbsp;Ember.js</h2>
-<p>Like a good programmer should, I first started by reading <a href="http://emberjs.com/documentation/">the documentation for Ember.js</a>. But, like a lot of documentation, it is dense and not terribly good at painting the big&nbsp;picture.</p>
-<p>I was excited to find that they had a <a href="http://emberjs.com/guides/">guides section</a> but frustrated that those guides weren&#8217;t exactly of the tutorial&nbsp;type.</p>
-<p>Next, I was pointed to <a href="http://trek.github.com/">this essay by Trek Glowacki</a> as a great resource for how to build an Ember.js app. And that it most certainly&nbsp;is. </p>
-<p>However, it&#8217;s a step-by-step guide to build a massive app completely in Ember.js. It does not stop to answer questions about how these new concept might or might not match up with concepts with which the reader may be&nbsp;familiar.</p>
-<p>That is, it&#8217;s a tutorial that requires you to forget everything else you know. This is a great way to truly learn something new, but it&#8217;s not so good for productivity under a&nbsp;deadline.</p>
-<h3>The First&nbsp;Code</h3>
-<p>With the first code I wrote, I attempted to follow Trek&#8217;s guide to the letter. I had outlets and routes and felt good about the structure I was laying out. However, it didn&#8217;t really seem to&nbsp;work.</p>
-<p><a href="http://jsfiddle.net/veDjq/">Here&#8217;s a look at what the code basically looked like at this&nbsp;point.</a></p>
-<p>The <span class="caps">HTML</span> that corresponds to the Javascript in the link above is lost in time. However, the issue was that I was having problems with understanding how the outlets connected to the app and the notion that Trek&#8217;s guides seems to assume that the whole page is controlled by the&nbsp;Javascript.</p>
-<p>Additionally, I was having issues with how the callbacks that are happening wouldn&#8217;t be finished in time for the code that needed to use their&nbsp;results. </p>
-<p>You&#8217;ll remember the third-part <span class="caps">API</span> I talked about. It requires that a signature string be created and appended to every <span class="caps">API</span>&nbsp;call. </p>
-<div class="codehilite"><pre><span class="n">App</span><span class="p">.</span><span class="n">Signature</span> <span class="p">=</span> <span class="n">Ember</span><span class="p">.</span><span class="n">Object</span><span class="p">.</span><span class="n">extend</span><span class="p">();</span>
-<span class="n">App</span><span class="p">.</span><span class="n">Signature</span><span class="p">.</span><span class="n">reopenClass</span><span class="p">({</span>
-    <span class="n">signature</span><span class="p">:</span> <span class="s">&#39;&#39;</span><span class="p">,</span>
-    <span class="n">getSignature</span><span class="p">:</span> <span class="k">function</span><span class="p">(){</span>
-        $<span class="p">.</span><span class="n">ajax</span><span class="p">({</span>
-            <span class="n">async</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>
-            <span class="n">url</span><span class="p">:</span> <span class="s">&#39;/auth/&#39;</span><span class="p">,</span>
-            <span class="n">success</span><span class="p">:</span> <span class="k">function</span><span class="p">(</span><span class="n">response</span><span class="p">){</span>
-                <span class="n">this</span><span class="p">.</span><span class="n">signature</span> <span class="p">=</span> <span class="n">response</span><span class="p">;</span>
-            <span class="p">}</span>
-        <span class="p">});</span>
-        <span class="k">return</span> <span class="n">this</span><span class="p">.</span><span class="n">signature</span><span class="p">;</span>
-    <span class="p">}</span>
-<span class="p">});</span>
-</pre></div>
-
-
-<p>Turns out, I didn&#8217;t know anything about promises or deferreds. This was one of the great things I learned when I asked <a href="http://stackoverflow.com/questions/12732692/forcing-ember-to-wait-for-value-from-an-ajax-request">this question on Stack Overflow</a>. This is clearly not an Ember problem, but it was something great to&nbsp;learn.</p>
-<p>I quickly realized that the outlets and routes wouldn&#8217;t work for me, mostly because it seemed like my simple app didn&#8217;t need them. They were just clouding my already muddled understanding of what I was&nbsp;doing.</p>
-<h3>The Second&nbsp;Code</h3>
-<p>Through some trials and tribulations, I eventually was able to cobble together some code that sort of worked. It seemed like I had a lot of verbose code that didn&#8217;t do much except to get things set&nbsp;up. </p>
-<p>As a heavy jQuery user, I kept thinking to myself that the functionality I had could essentially be done in about half the code if I just used jQuery. Sure, it might not have the structure I was searching for, but the question still&nbsp;nagged.</p>
-<p><a href="http://jsfiddle.net/9aH2q/5/">This is the code as it stood and was sort of&nbsp;working.</a></p>
-<p>The error that I had with this code was that The PostedPiblications data was always one action behind the PostedPubsCampaign selection. That is, if the app loaded with the data for campaign A, then the user changed the selection to campaign B, nothing would happen. I the user then selected campaign C, the PostedPublications shown on the page would belong to campaign&nbsp;B.</p>
-<p>I could see that the correct <span class="caps">API</span> call was being made, but the page wasn&#8217;t updating as expected. After fighting for this for a full day, I posted <a href="http://stackoverflow.com/questions/12785996/updating-ember-view-with-change-in-a-select-view">this StackOverflow question that remains unanswered</a> with 40&nbsp;views.</p>
-<p>Despite the fact that I had some code that worked moderately well, I still didn&#8217;t really understand why I needed controllers and views. The models didn&#8217;t seem to quite work the way my conception of models does (based on my experiences with Django and Sqlalchemy&nbsp;models).</p>
-<h3>Getting&nbsp;Help</h3>
-<p>You&#8217;ll notice that I posted a few question on StackOverflow while working through this Ember.js work. I was also in the #emberjs <span class="caps">IRC</span> channel often and asking questions in there. Adding to that numerous Google searches and bugging my coworkers and I was quickly exhausting my supply of&nbsp;resources.</p>
-<p>Given the relative newness of Ember.js and the current lack of experienced folks who have built apps with it <span class="caps">AND</span> are willing to help in <span class="caps">IRC</span>, blog, answer <span class="caps">SO</span> questions, etc., it&#8217;s a challenging environment for a newbie. I did just stumble on <a href="http://www.embernoob.com/">EmberNoob</a> and that may grow into a nice&nbsp;resource.</p>
-<p>All of this trouble left me frustrated, confused and still staring at a looming&nbsp;deadline.</p>
-<h2>Trying out&nbsp;Backbone.js</h2>
-<p>At this point, one of my coworkers made the point that we were already using <a href="http://backbonejs.org/">Backbone.js</a> in many other places in our application. Now that I had a good sense of what I wanted to do in the app, it might be easier to learn Backbone instead of&nbsp;Ember.</p>
-<p>I took essentially a day and ported the code I had over the Backbone.js and ended up with <a href="https://gist.github.com/3886893">this bit of code</a>.</p>
-<p>With this, I couldn&#8217;t get past the point of a syntax error. JSLint wasn&#8217;t helping and no one in the office could figure it out. It was at this point, with 4 days of Ember experimentation and 1 day of Backbone coding, that my deadline pressure started tickling the back of my brain and I had to move on to technologies I already&nbsp;knew.</p>
-<h2>Temporary&nbsp;Conclusion</h2>
-<p>The tenor of this post might lead you to believe that I don&#8217;t like these two projects and think they aren&#8217;t valuable. Quite the&nbsp;contrary.</p>
-<p>Both of these Javascript <span class="caps">MVC</span> frameworks have great promise for me and I intend to find another, perhaps better, situation in which I can learn and use them. I really appreciate the structure and modularity that both projects brought to my&nbsp;code.</p>
-<p>I also appreciate that they forced me to think about my Javascript code in ways I previously hadn&#8217;t had to. I like the idea of having the code that gets the data into the <span class="caps">DOM</span> be somewhat transparent to the code that pulls that data from its&nbsp;source.</p>
-<p>I&#8217;ll come back around to both Ember.js and Backbone.js&nbsp;again.</p>
-<h2>Learnings</h2>
-<p>In the course of this work, I learned a good deal about promises and deferreds. Additionally, I was exposed to the beauty that is <a href="http://underscorejs.org/">Underscore.js</a> and <a href="http://momentjs.com/">Moment.js</a>. That progress alone was worth delving into this&nbsp;stuff.</p><p>There are <a href=".././/2012/10/13/javascript-mvc-ember-backbone/#disqus_thread">comments</a>.</p>
-                </article>
+</footer><!-- /.post-info -->
+                <p>I recently started work on an app using a third-party <span class="caps">API</span> that deals with posting to and monitoring social networks. Given that the app was going to be a single-page affair and was strictly only going to be using this third-party <span class="caps">API</span>, I thought it would be a good chance ...</p>
+                <a class="readmore" href=".././/2012/10/13/javascript-mvc-ember-backbone/">read more</a>
+                <p>There are <a href=".././/2012/10/13/javascript-mvc-ember-backbone/#disqus_thread">comments</a>.</p>
+                </div><!-- /.entry-content -->
+            </article></li>
+        
+        
+            </ol><!-- /#posts-list -->
+            
                 
-                    
 <p class="paginator">
     
     Page 1 / 1
     
 </p>
 
-                
-            </aside><!-- /#featured -->
-            
-        
-        
-        
-            </ol><!-- /#posts-list -->
             
             </section><!-- /#content -->
         
